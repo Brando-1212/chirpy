@@ -1,5 +1,6 @@
-package main
 
+package main
+/*
 import (
 	"encoding/json"
 	"net/http"
@@ -54,3 +55,4 @@ func cleanBody(body string, badWords map[string]struct{}) string {
 	clean := strings.Join(words, " ")
 	return clean
 }
+*/
