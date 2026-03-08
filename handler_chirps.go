@@ -35,7 +35,7 @@ func (cfg *apiConfig) handlerChirps (w http.ResponseWriter, r *http.Request) {
 
 	clean := cleanBody(params.Body, badWords)
 
-	tempChirp, err := cfg.db.CreateChirp(r.Context(), database.CreateChirpParams{
+	dbChirp, err := cfg.db.CreateChirp(r.Context(), database.CreateChirpParams{
 		Body   : clean,
 		UserID : params.UserID,
 	})
@@ -44,11 +44,11 @@ func (cfg *apiConfig) handlerChirps (w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	chirp := Chirp{
-		ID : tempChirp.ID,
-		CreatedAt : tempChirp.CreatedAt,
-		UpdatedAt : tempChirp.UpdatedAt,
-		Body : tempChirp.Body,
-		UserID : tempChirp.UserID,
+		ID : dbChirp.ID,
+		CreatedAt : dbChirp.CreatedAt,
+		UpdatedAt : dbChirp.UpdatedAt,
+		Body : dbChirp.Body,
+		UserID : dbChirp.UserID,
 	}
 	respondWithJSON(w, http.StatusCreated, chirp)
 }
