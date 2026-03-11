@@ -1,16 +1,19 @@
 package main
 
 import(
-
 	"encoding/json"
 	"net/http"
+
+	"chirpy/internal/auth"
+	"chirpy/internal/database"
 )
 
 
-func (cfg *apiConfig) handlerUser (w http.ResponseWriter, r *http.Request)  {
+func (cfg *apiConfig) handlerUser (w http.ResponseWriter, r *http.Request) {
 	
 	type parameters struct {
-		Email string `json:"email"`
+		Password string `json:"password"`
+		Email string    `json:"email"`
 	}
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
@@ -20,8 +23,17 @@ func (cfg *apiConfig) handlerUser (w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	
-	tempUser, err := cfg.db.CreateUser(r.Context(),params.Email)
+	hashedPassword, err := auth.HashPassword(params.Password)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Could not hash password", err)
+		return
+	}
+
+
+	tempUser, err := cfg.db.CreateUser(r.Context(), database.CreateUserParams{
+		Email          : params.Email,
+		HashedPassword : hashedPassword,
+	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create user", err)
 		return
