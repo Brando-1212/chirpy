@@ -30,7 +30,7 @@ func (cfg *apiConfig) handlerUser (w http.ResponseWriter, r *http.Request) {
 	}
 
 
-	tempUser, err := cfg.db.CreateUser(r.Context(), database.CreateUserParams{
+	dbUser, err := cfg.db.CreateUser(r.Context(), database.CreateUserParams{
 		Email          : params.Email,
 		HashedPassword : hashedPassword,
 	})
@@ -39,10 +39,11 @@ func (cfg *apiConfig) handlerUser (w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user := User{
-		ID        : tempUser.ID,
-		CreatedAt : tempUser.CreatedAt,
-		UpdatedAt : tempUser.UpdatedAt,
-		Email     : tempUser.Email,
+		ID        : dbUser.ID,
+		CreatedAt : dbUser.CreatedAt,
+		UpdatedAt : dbUser.UpdatedAt,
+		Email     : dbUser.Email,
+		IsChirpyRed: dbUser.IsChirpyRed,
 	}
 	respondWithJSON(w, http.StatusCreated, user)
 

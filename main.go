@@ -20,6 +20,7 @@ type apiConfig struct {
 	db             *database.Queries
 	platform       string
 	jwtSecret      string
+	polkaKey       string
 }
 
 type User struct {
@@ -28,6 +29,8 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
 	Password  string    `json:"-"`
+	IsChirpyRed bool      `json:"is_chirpy_red"`
+
 }
 
 type Chirp struct {
@@ -57,6 +60,11 @@ func main() {
 		log.Fatal("JWT_SECRET must be set")
 	}
 
+	polkaKey := os.Getenv("POLKA_KEY")
+	if polkaKey == "" {
+		log.Fatal("polkaKey must be set")
+	}
+
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatalf("Error opening database: %s", err)
@@ -69,6 +77,7 @@ func main() {
 		db             : dbQueries,
 		platform       : PLATFORM,
 		jwtSecret      : jwtSecret,
+		polkaKey       : polkaKey,
 	}
 
 	
@@ -77,6 +86,7 @@ func main() {
 
 	mux.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(file))))
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
+	mux.HandleFunc("POST /api/polka/webhooks", apiCfg.handlerWebhook)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
 	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
 	//mux.HandleFunc("POST /api/validate_chirp", handlerValidateChirp)
